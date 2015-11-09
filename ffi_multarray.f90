@@ -2,7 +2,7 @@ module exports
 
   contains
 
-    ! this will not update 
+    ! this will not update, due to use of `value`
     subroutine wont_set_out (input, output) bind(c, name = 'wont_set_out')
       implicit none
       integer, intent(in), value :: input

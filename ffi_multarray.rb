@@ -10,15 +10,6 @@ module Hello
   # attach_function :return_arr_ptr, [ :pointer ], :pointer
 end
 
-# input = gets.chomp.to_i
-# arr = [1,2,3,4]
-x = 0
-y = 1
-v = Hello.wont_set_out(x, y)
-puts "x: #{x}"
-puts "y: #{y}"
-puts "v: #{v}"
-
 ptr = FFI::MemoryPointer.new(:int, 5)
 Hello.assign_arr(ptr)
 int_ptr = ptr.read_pointer

@@ -17,6 +17,14 @@ module exports
       my_arr = [1,2,3,4,5]
     end subroutine assign_arr
 
+    ! this won't work, return type of BIND(C) function can't be an array
+    ! function fn_arr(n) bind(c, name = 'fn_arr')
+      ! integer, intent(in) :: n
+      ! integer, dimension(n) :: fn_arr
+      ! integer i
+      ! fn_arr = ([(i, i=1, n)])
+    ! end function fn_arr
+
     ! function return_arr_ptr(arr_ptr) bind(c, name = 'return_arr_ptr') result(retptr)
       ! implicit none
       ! integer, dimension(:), pointer :: retptr

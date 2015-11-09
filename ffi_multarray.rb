@@ -5,7 +5,6 @@ module Hello
   extend FFI::Library
   ffi_lib 'ffi_multarray.dylib'
   # attach_function :multarray, [ :int ], :int
-  attach_function :wont_set_out, [ :int, :int ], :void
   attach_function :assign_arr, [ :pointer ], :void
   # attach_function :return_arr_ptr, [ :pointer ], :pointer
 end

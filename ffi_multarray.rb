@@ -23,6 +23,10 @@ ptr = FFI::MemoryPointer.new(:int, 5)
 Hello.assign_arr(ptr)
 int_ptr = ptr.read_pointer
 
-puts "int_ptr get array: #{int_ptr.get_array_of_int(0, 5)}"
 puts "int_ptr read_array_of_int: #{int_ptr.read_array_of_int(5)}"
-puts "int_ptr read_int8: #{int_ptr.read_int8}"
+
+# Every now and then we get this error:
+# int_ptr read_array_of_int: [1, 2, 3, 4, 5]
+# ruby(28078,0x7fff7c3d3300) malloc: *** error for object 0x6: pointer being freed was not allocated
+# *** set a breakpoint in malloc_error_break to debug
+# Abort trap: 6

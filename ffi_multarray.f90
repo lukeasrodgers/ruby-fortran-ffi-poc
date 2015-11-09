@@ -14,7 +14,7 @@ module exports
       implicit none
       integer, target, allocatable, dimension(:) :: my_arr
       allocate(my_arr(0:4))
-      my_arr = [1,2,3,4,5,6]
+      my_arr = [1,2,3,4,5]
     end subroutine assign_arr
 
     ! function return_arr_ptr(arr_ptr) bind(c, name = 'return_arr_ptr') result(retptr)

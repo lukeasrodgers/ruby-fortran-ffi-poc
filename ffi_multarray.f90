@@ -1,4 +1,7 @@
 module exports
+  implicit none
+
+  integer, dimension(:), allocatable, target :: xs
 
   contains
 
@@ -24,6 +27,19 @@ module exports
       ! integer i
       ! fn_arr = ([(i, i=1, n)])
     ! end function fn_arr
+
+    ! this also won't work, can't have bind(c) and return pointer
+    ! function point_to_xs(n) bind(c, name = 'point_to_xs')
+      ! implicit none
+      ! integer, intent(in) :: n
+      ! integer, dimension(:), pointer :: point_to_xs
+      ! integer i
+
+      ! allocate(xs(n))
+      ! xs = ([(i,i=1,n)])
+      ! point_to_xs => xs
+    ! end function point_to_xs
+
 
     ! function return_arr_ptr(arr_ptr) bind(c, name = 'return_arr_ptr') result(retptr)
       ! implicit none

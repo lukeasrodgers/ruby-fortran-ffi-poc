@@ -6,14 +6,18 @@ module Hello
   ffi_lib 'ffi_multarray.dylib'
   # attach_function :multarray, [ :int ], :int
   attach_function :assign_arr, [ :pointer ], :void
+  attach_function :ret_i, [], :int
+  attach_function :ret_loc_i, [:int], :pointer
   # attach_function :return_arr_ptr, [ :pointer ], :pointer
 end
 
 ptr = FFI::MemoryPointer.new(:int, 5)
 Hello.assign_arr(ptr)
 int_ptr = ptr.read_pointer
-
 puts "int_ptr read_array_of_int: #{int_ptr.read_array_of_int(5)}"
+
+x = Hello.ret_i()
+puts "x: #{x}"
 
 # Every now and then we get this error:
 # int_ptr read_array_of_int: [1, 2, 3, 4, 5]

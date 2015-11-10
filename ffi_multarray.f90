@@ -2,6 +2,7 @@ module exports
   implicit none
 
   integer, dimension(:), allocatable, target :: xs
+  integer :: foo = 1
 
   contains
 
@@ -19,6 +20,24 @@ module exports
       allocate(my_arr(0:4))
       my_arr = [1,2,3,4,5]
     end subroutine assign_arr
+
+    ! works
+    integer function ret_i() bind(c, name = 'ret_i')
+      ret_i = 3
+    end function ret_i
+
+    ! this compiles, but doesn't interop with ruby
+    integer function ret_loc_i(n) bind(c, name = 'ret_loc_i')
+      ! fails unless we specify call by value
+      ! integer, intent(in), value :: n
+      integer, intent(in), value :: n
+      integer i
+      i = n + 4
+      ! allocate(xs(n))
+      ! xs = ([(i,i=1,n)])
+      ! ret_loc_i = loc(xs)
+      ret_loc_i = loc(foo)
+    end function ret_loc_i
 
     ! this won't work, return type of BIND(C) function can't be an array
     ! function fn_arr(n) bind(c, name = 'fn_arr')

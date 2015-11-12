@@ -54,6 +54,16 @@ module exports
       ! ret_p = p
     ! end function ret_p
 
+    type (point) function ret_p(a, b)
+      implicit none
+      integer, intent(in) :: a, b
+      ret_p%x = a
+      ret_p%y = b
+    end function ret_p
+
+    ! tried changing inout to value, doesn't work with ruby still
+    ! tried using bind_c, doesn't work
+    ! 
     subroutine sub_p(a, b, p)
       implicit none
       integer, intent(in) :: a, b

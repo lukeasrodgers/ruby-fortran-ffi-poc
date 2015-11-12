@@ -5,8 +5,8 @@ module exports
   integer, dimension(:), allocatable, target :: xs
   integer :: foo = 1
 
-  type, bind(c) :: point
-    integer(c_int) :: x, y
+  type point
+    integer :: x, y
   end type point
 
   contains
@@ -45,16 +45,16 @@ module exports
     end function ret_loc_i
 
     ! compiles but doesn't work with ruby...
-    type (point) function ret_p(a, b) bind(c, name = 'ret_p') 
-      implicit none
-      integer, intent(in) :: a, b
-      type (point) :: p
-      ret_p%x = a
-      ret_p%y = b
-      ret_p = p
-    end function ret_p
+    ! type (point) function ret_p(a, b) bind(c, name = 'ret_p') 
+      ! implicit none
+      ! integer, intent(in) :: a, b
+      ! type (point) :: p
+      ! ret_p%x = a
+      ! ret_p%y = b
+      ! ret_p = p
+    ! end function ret_p
 
-    subroutine sub_p(a, b, p) bind(c, name = 'sub_p') 
+    subroutine sub_p(a, b, p)
       implicit none
       integer, intent(in) :: a, b
       type (point), intent(inout) :: p

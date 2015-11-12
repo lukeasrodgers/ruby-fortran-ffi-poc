@@ -1,8 +1,13 @@
 module exports
+  use ISO_C_BINDING
   implicit none
 
   integer, dimension(:), allocatable, target :: xs
   integer :: foo = 1
+
+  type, bind(c) :: point
+    integer(c_int) :: x, y
+  end type point
 
   contains
 
@@ -38,6 +43,24 @@ module exports
       ! ret_loc_i = loc(xs)
       ret_loc_i = loc(foo)
     end function ret_loc_i
+
+    ! compiles but doesn't work with ruby...
+    type (point) function ret_p(a, b) bind(c, name = 'ret_p') 
+      implicit none
+      integer, intent(in) :: a, b
+      type (point) :: p
+      ret_p%x = a
+      ret_p%y = b
+      ret_p = p
+    end function ret_p
+
+    subroutine sub_p(a, b, p) bind(c, name = 'sub_p') 
+      implicit none
+      integer, intent(in) :: a, b
+      type (point), intent(inout) :: p
+      p%x = a
+      p%y = b
+    end subroutine sub_p
 
     ! this won't work, return type of BIND(C) function can't be an array
     ! function fn_arr(n) bind(c, name = 'fn_arr')

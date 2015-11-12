@@ -62,6 +62,18 @@ module exports
       p%y = b
     end function ret_p
 
+    ! compiles but causes segfault with ruby
+    ! this suggests the problem is merely creating the point
+    function ret_p_loc(a, b) result(p_loc) bind(c, name= 'ret_p_loc')
+      implicit none
+      integer, intent(in) :: a, b
+      type (point), target :: p
+      integer p_loc
+      p%x = a
+      p%y = b
+      p_loc = 1
+    end function ret_p_loc
+
     ! tried changing inout to value, doesn't work with ruby still
     ! tried using bind_c, doesn't work
     ! 

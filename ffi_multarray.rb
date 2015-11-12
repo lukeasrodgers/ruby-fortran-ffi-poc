@@ -22,6 +22,7 @@ module Hello
   # attach_function :ret_p, [:int, :int], :pointer
   attach_function :__exports_MOD_sub_p, [:int, :int, Point.by_value], :void
   # attach_function :return_arr_ptr, [ :pointer ], :pointer
+  attach_function :ret_p_loc, [ :int, :int ], :int
 end
 
 module Clib
@@ -48,6 +49,9 @@ point_ptr = FFI::MemoryPointer.new(Point, 1, false)
 
 cp = Clib.get_cpoint(3, 4)
 puts "cp: #{cp[:x]}, #{cp[:y]}"
+
+# segfaults even though we just return in, unrelated to pointer
+# x = Hello.ret_p_loc(1,2)
 
 # Every now and then we get this error:
 # int_ptr read_array_of_int: [1, 2, 3, 4, 5]

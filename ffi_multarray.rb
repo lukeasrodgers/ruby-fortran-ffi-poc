@@ -44,7 +44,7 @@ point_ptr = FFI::MemoryPointer.new(Point, 1, false)
 # Hello.__exports_MOD_sub_p(1,2, p)
 
 # segfaults
-# o = Hello.__exports_MOD_ret_p(1,2)
+# Hello.__exports_MOD_ret_p(1,2)
 
 cp = Clib.get_cpoint(3, 4)
 puts "cp: #{cp[:x]}, #{cp[:y]}"

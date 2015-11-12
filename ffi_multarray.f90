@@ -54,11 +54,12 @@ module exports
       ! ret_p = p
     ! end function ret_p
 
-    type (point) function ret_p(a, b)
+    function ret_p(a, b) result(p)
       implicit none
       integer, intent(in) :: a, b
-      ret_p%x = a
-      ret_p%y = b
+      type (point), target :: p
+      p%x = a
+      p%y = b
     end function ret_p
 
     ! tried changing inout to value, doesn't work with ruby still

@@ -9,6 +9,10 @@ module exports
     integer :: x, y
   end type point
 
+  type, bind(c) :: cpoint
+    integer(c_int) :: x, y
+  end type cpoint
+
   contains
 
     ! this will not update, due to use of `value`
@@ -84,6 +88,16 @@ module exports
       p%x = a
       p%y = b
     end subroutine sub_p
+
+    ! tried changing inout to value, doesn't work with ruby still
+    ! tried using bind_c, doesn't work
+    subroutine sub_p_two(a, b) bind(c, name = 'sub_p_two')
+      implicit none
+      integer, intent(in) :: a, b
+      type (cpoint) :: p
+      p%x = a
+      p%y = b
+    end subroutine sub_p_two
 
     ! this won't work, return type of BIND(C) function can't be an array
     ! function fn_arr(n) bind(c, name = 'fn_arr')

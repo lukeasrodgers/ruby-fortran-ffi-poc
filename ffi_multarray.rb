@@ -43,7 +43,7 @@ puts "x: #{x}"
 point_ptr = FFI::MemoryPointer.new(Point, 1, false)
 # point_ptr = FFI::MemoryPointer.new(:int, 2)
 # p = Point.new(point_ptr)
-Hello.__exports_MOD_sub_p(1,2, p)
+# Hello.__exports_MOD_sub_p(1,2, p)
 
 # segfaults
 # Hello.__exports_MOD_ret_p(1,2)
@@ -52,7 +52,7 @@ cp = Clib.get_cpoint(3, 4)
 puts "cp: #{cp[:x]}, #{cp[:y]}"
 
 # segfaults even though it doesn't return/interact with cpoint
-# Hello.sub_p_two(4,5)
+Hello.sub_p_two(4,5)
 
 # segfaults even though we just return in, unrelated to pointer
 # x = Hello.ret_p_loc(1,2)

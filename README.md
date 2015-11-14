@@ -38,9 +38,13 @@ evaluation, `use ISO_C_BINDING`, `integer(c_int)`, and some extra indirection wi
 
 We don't need to explicitly make `ret_i` a `c_int` here.
 
+ruby:
+
 ```ruby
 attach_function :ret_i, [], :int
 ```
+
+fortran:
 
 ```fortran
 integer function ret_i() bind(c, name = 'ret_i')
@@ -49,6 +53,8 @@ end function ret_i
 ```
 
 ## Allocate and return a Fortran array from a subroutine
+
+ruby:
 
 ```ruby
 attach_function :assign_arr, [ :pointer ], :void
@@ -59,6 +65,8 @@ int_ptr = ptr.read_pointer
 puts "ints: #{int_ptr.read_array_of_int(5)}"
 => [1, 2, 3, 4, 5]
 ```
+
+fortran:
 
 ```fortran
 subroutine assign_arr (my_arr) bind(c, name = 'assign_arr')
@@ -76,12 +84,14 @@ determine the subroutine name in the dylib is `__exports_MOD_sub_p`, based on th
 module name.
 
 The Fortran derived type point variable, here called `gpoint`, must be declared as module
-data. Every effort I made to avoid this resulted in segfaults with interoping with ruby,
+data. Every effort I made to avoid this resulted in segfaults when interoping with ruby,
 I'm assuming because the `point` object would get freed when it went out of scope in the
 subroutine.
 
 In order to interact with the integers passed to the Fortran subroutine, they must be both
 declared as `c_int` and passed by value.
+
+ruby:
 
 ```ruby
 class Point < FFI::Struct
@@ -99,6 +109,8 @@ puts point_ptr
 puts "p: #{p}, #{p[:x]}, #{p[:y]}"
 => p: #<Point:0x00000101df3ea8>, 1, 2
 ```
+
+fortran:
 
 ```fortran
 type point
@@ -131,6 +143,8 @@ a pointer to the array.
 In ruby, we can effectively iterate through the array by incrementing the memory location from
 which we are reading by the size of our FFI `Point` class.
 
+ruby:
+
 ```ruby
 attach_function :__exports_MOD_sub_p_arr, [:int, :int, :pointer], :void
 ...
@@ -143,6 +157,8 @@ p3 = Point.new(point_ptr_arr.read_pointer + Point.size)
 puts "p3: #{p3}, #{p3[:x]}, #{p3[:y]}"
 => p3: #<Point:0x00000101df39f8>, 8, 14
 ```
+
+fortran:
 
 ```fortran
 type point

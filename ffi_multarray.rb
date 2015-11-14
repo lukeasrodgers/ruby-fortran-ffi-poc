@@ -20,10 +20,11 @@ module Hello
   attach_function :ret_loc_i, [:int], :pointer
   attach_function :__exports_MOD_ret_p, [:int, :int], :pointer
   # attach_function :ret_p, [:int, :int], :pointer
-  attach_function :__exports_MOD_sub_p, [:int, :int], :void
+  attach_function :__exports_MOD_sub_p, [:int, :int, Point.by_ref], :void
   # attach_function :return_arr_ptr, [ :pointer ], :pointer
   attach_function :ret_p_loc, [ :int, :int ], :int
   attach_function :sub_p_two, [ :int, :int ], :void
+  attach_function :ret_cgpoint, [ :int, :int ], Point.by_ref
 end
 
 module Clib
@@ -41,10 +42,15 @@ puts "int_ptr read_array_of_int: #{int_ptr.read_array_of_int(5)}"
 x = Hello.ret_i()
 puts "x: #{x}"
 
+# segfaults
+# n = Hello.ret_cgpoint(1,2)
+
 point_ptr = FFI::MemoryPointer.new(Point, 1, false)
 # point_ptr = FFI::MemoryPointer.new(:int, 2)
 # p = Point.new(point_ptr)
-# Hello.__exports_MOD_sub_p(1,2)
+p = Point.new
+Hello.__exports_MOD_sub_p(1,2, p)
+puts "p: #{p}, #{p[:x]}, #{p[:y]}"
 
 # segfaults
 # Hello.__exports_MOD_ret_p(1,2)

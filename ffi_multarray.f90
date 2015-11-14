@@ -13,7 +13,19 @@ module exports
     integer(c_int) :: x, y
   end type cpoint
 
+  type (point), target :: gpoint
+  type (cpoint), target :: cgpoint
+
   contains
+
+    ! compiles, segfaults ruby
+    type (cpoint) function ret_cgpoint (a, b) bind(c, name = 'ret_cgpoint')
+      implicit none
+      integer :: a, b
+      cgpoint%x = a
+      cgpoint%y = b
+      ret_cgpoint = cgpoint
+    end function ret_cgpoint
 
     ! this will not update, due to use of `value`
     subroutine wont_set_out (input, output) bind(c, name = 'wont_set_out')
@@ -81,20 +93,21 @@ module exports
     ! tried changing inout to value, doesn't work with ruby still
     ! tried using bind_c, doesn't work
     ! 
-    subroutine sub_p(a, b)
+    subroutine sub_p(a, b, p)
       implicit none
       integer, intent(in) :: a, b
-      type (point) :: p
-      p%x = a
-      p%y = b
+      type (point), intent(inout), pointer :: p
+      gpoint%x = 1
+      gpoint%y = 2
+      p => gpoint
     end subroutine sub_p
 
     ! tried changing inout to value, doesn't work with ruby still
     ! tried using bind_c, doesn't work
-    subroutine sub_p_two(a, b) bind(c, name = 'sub_p_two')
+    subroutine sub_p_two(a, b, p) bind(c, name = 'sub_p_two')
       implicit none
       integer, intent(in) :: a, b
-      type (cpoint) :: p
+      type (cpoint), intent(inout) :: p
       p%x = a
       p%y = b
     end subroutine sub_p_two

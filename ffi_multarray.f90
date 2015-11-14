@@ -100,6 +100,19 @@ module exports
       p => gpoint
     end subroutine sub_p
 
+    subroutine sub_p_arr(a, b, p)
+      implicit none
+      integer(c_int), intent(in), value :: a, b
+      type (point), target, allocatable, dimension(:) :: point_arr
+      type (point), pointer, dimension(:) :: p
+      allocate(point_arr(1:2))
+      point_arr(1)%x = a
+      point_arr(1)%y = b
+      point_arr(2)%x = a + a
+      point_arr(2)%y = b + b
+      p => point_arr
+    end subroutine sub_p_arr
+
     ! tried changing inout to value, doesn't work with ruby still
     ! tried using bind_c, doesn't work
     subroutine sub_p_two(a, b, p) bind(c, name = 'sub_p_two')

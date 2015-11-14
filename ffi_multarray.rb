@@ -48,7 +48,7 @@ puts "x: #{x}"
 point_ptr = FFI::MemoryPointer.new(Point, 64)
 # point_ptr = FFI::MemoryPointer.new(:int, 2)
 # p = Point.new(point_ptr)
-Hello.__exports_MOD_sub_p(1,2, point_ptr)
+Hello.__exports_MOD_sub_p(4,84, point_ptr)
 p = Point.new(point_ptr.read_pointer)
 # byebug
 puts point_ptr

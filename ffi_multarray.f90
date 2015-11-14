@@ -90,15 +90,13 @@ module exports
       p_loc = 1
     end function ret_p_loc
 
-    ! tried changing inout to value, doesn't work with ruby still
-    ! tried using bind_c, doesn't work
-    ! 
+    ! works!
     subroutine sub_p(a, b, p)
       implicit none
-      integer, intent(in) :: a, b
+      integer(c_int), intent(in), value :: a, b
       type (point), intent(inout), pointer :: p
-      gpoint%x = 5
-      gpoint%y = 2
+      gpoint%x = a
+      gpoint%y = b
       p => gpoint
     end subroutine sub_p
 

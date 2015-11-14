@@ -107,7 +107,7 @@ p = Point.new(point_ptr.read_pointer)
 puts point_ptr
 => #<FFI::MemoryPointer address=0x00000102d7e450 size=8>
 puts "p: #{p}, #{p[:x]}, #{p[:y]}"
-=> p: #<Point:0x00000101df3ea8>, 1, 2
+=> p: 1, 2
 ```
 
 fortran:
@@ -143,6 +143,14 @@ a pointer to the array.
 In ruby, we can effectively iterate through the array by incrementing the memory location from
 which we are reading by the size of our FFI `Point` class.
 
+Caveats:
+* Printing the array points will occasionally yield junk data, e.g.:
+  ```
+  p2: 270510300, -1879048192
+  p3: 272107354, -1879048192
+  ```
+* This will occasionally segfault.
+
 ruby:
 
 ```ruby
@@ -152,10 +160,10 @@ point_ptr_arr = FFI::MemoryPointer.new(Point, 2, true)
 Flib.__exports_MOD_sub_p_arr(4, 7, point_ptr_arr)
 p2 = Point.new(point_ptr_arr.read_pointer)
 puts "p2: #{p2}, #{p2[:x]}, #{p2[:y]}"
-=> p2: #<Point:0x00000101df3c28>, 4, 7
+=> p2: 4, 7
 p3 = Point.new(point_ptr_arr.read_pointer + Point.size)
 puts "p3: #{p3}, #{p3[:x]}, #{p3[:y]}"
-=> p3: #<Point:0x00000101df39f8>, 8, 14
+=> p3: 8, 14
 ```
 
 fortran:

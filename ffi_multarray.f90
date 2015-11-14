@@ -142,15 +142,4 @@ module exports
       ! xs = ([(i,i=1,n)])
       ! point_to_xs => xs
     ! end function point_to_xs
-
-
-    ! function return_arr_ptr(arr_ptr) bind(c, name = 'return_arr_ptr') result(retptr)
-      ! implicit none
-      ! integer, dimension(:), pointer :: retptr
-      ! integer, dimension(5), pointer :: arr_ptr
-
-      ! allocate(myarr(0:4))
-      ! myarr = [1,2,3,4,5]
-      ! retptr => myarr
-    ! end function return_arr_ptr
 end module exports

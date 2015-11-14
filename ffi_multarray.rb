@@ -43,7 +43,7 @@ puts "x: #{x}"
 point_ptr = FFI::MemoryPointer.new(Point, 1, false)
 # point_ptr = FFI::MemoryPointer.new(:int, 2)
 # p = Point.new(point_ptr)
-# Hello.__exports_MOD_sub_p(1,2, p)
+Hello.__exports_MOD_sub_p(1,2, p)
 
 # segfaults
 # Hello.__exports_MOD_ret_p(1,2)

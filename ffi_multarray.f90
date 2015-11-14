@@ -6,6 +6,7 @@ module exports
   integer :: foo = 1
 
   type point
+    sequence
     integer :: x, y
   end type point
 

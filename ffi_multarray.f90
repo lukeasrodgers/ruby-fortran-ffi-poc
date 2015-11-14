@@ -6,7 +6,6 @@ module exports
   integer :: foo = 1
 
   type point
-    sequence
     integer :: x, y
   end type point
 
@@ -86,8 +85,8 @@ module exports
       implicit none
       integer, intent(in) :: a, b
       type (point) :: p
-      ! p%x = a
-      ! p%y = b
+      p%x = a
+      p%y = b
     end subroutine sub_p
 
     ! tried changing inout to value, doesn't work with ruby still

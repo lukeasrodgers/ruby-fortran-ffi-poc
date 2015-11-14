@@ -85,7 +85,7 @@ module exports
     subroutine sub_p(a, b, p)
       implicit none
       integer, intent(in) :: a, b
-      type (point), intent(inout) :: p
+      type (point), pointer :: p
       p%x = a
       p%y = b
     end subroutine sub_p

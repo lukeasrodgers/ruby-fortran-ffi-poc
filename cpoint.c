@@ -12,3 +12,10 @@ Cpoint *get_cpoint(int a, int b) {
   cpoint->y = 2;
   return cpoint;
 };
+
+Cpoint *bad_cpoint(int a, int b) {
+  Cpoint cpoint;
+  cpoint.x = 1;
+  cpoint.y = 2;
+  return &cpoint;
+}

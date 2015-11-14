@@ -30,6 +30,7 @@ module Clib
   extend FFI::Library
   ffi_lib 'cpoint.dylib'
   attach_function :get_cpoint, [ :int, :int ], CPoint.by_ref
+  attach_function :bad_cpoint, [ :int, :int ], CPoint.by_ref
 end
 
 ptr = FFI::MemoryPointer.new(:int, 5)
@@ -43,13 +44,17 @@ puts "x: #{x}"
 point_ptr = FFI::MemoryPointer.new(Point, 1, false)
 # point_ptr = FFI::MemoryPointer.new(:int, 2)
 # p = Point.new(point_ptr)
-Hello.__exports_MOD_sub_p(1,2)
+# Hello.__exports_MOD_sub_p(1,2)
 
 # segfaults
 # Hello.__exports_MOD_ret_p(1,2)
 
 cp = Clib.get_cpoint(3, 4)
 puts "cp: #{cp[:x]}, #{cp[:y]}"
+
+# this doesn't segfault, just returns junk data
+bad_cp = Clib.bad_cpoint(4, 5)
+puts "bad_cp: #{bad_cp[:x]}, #{bad_cp[:y]}"
 
 # segfaults even though it doesn't return/interact with cpoint
 # Hello.sub_p_two(4,5)

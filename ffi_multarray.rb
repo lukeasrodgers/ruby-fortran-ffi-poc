@@ -1,4 +1,4 @@
-# require 'byebug'
+require 'byebug'
 require 'ffi'
 
 class Point < FFI::Struct
@@ -20,7 +20,7 @@ module Hello
   attach_function :ret_loc_i, [:int], :pointer
   attach_function :__exports_MOD_ret_p, [:int, :int], :pointer
   # attach_function :ret_p, [:int, :int], :pointer
-  attach_function :__exports_MOD_sub_p, [:int, :int, Point.by_ref], :void
+  attach_function :__exports_MOD_sub_p, [:int, :int, :pointer], :void
   # attach_function :return_arr_ptr, [ :pointer ], :pointer
   attach_function :ret_p_loc, [ :int, :int ], :int
   attach_function :sub_p_two, [ :int, :int ], :void
@@ -45,11 +45,13 @@ puts "x: #{x}"
 # segfaults
 # n = Hello.ret_cgpoint(1,2)
 
-point_ptr = FFI::MemoryPointer.new(Point, 1, false)
+point_ptr = FFI::MemoryPointer.new(Point, 64)
 # point_ptr = FFI::MemoryPointer.new(:int, 2)
 # p = Point.new(point_ptr)
-p = Point.new
-Hello.__exports_MOD_sub_p(1,2, p)
+Hello.__exports_MOD_sub_p(1,2, point_ptr)
+p = Point.new(point_ptr.read_pointer)
+# byebug
+puts point_ptr
 puts "p: #{p}, #{p[:x]}, #{p[:y]}"
 
 # segfaults

@@ -97,7 +97,7 @@ module exports
       implicit none
       integer, intent(in) :: a, b
       type (point), intent(inout), pointer :: p
-      gpoint%x = 1
+      gpoint%x = 5
       gpoint%y = 2
       p => gpoint
     end subroutine sub_p

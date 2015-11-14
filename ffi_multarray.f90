@@ -82,18 +82,17 @@ module exports
     ! tried changing inout to value, doesn't work with ruby still
     ! tried using bind_c, doesn't work
     ! 
-    subroutine sub_p(a, b, p)
+    subroutine sub_p(a, b)
       implicit none
       integer, intent(in) :: a, b
-      type (point), intent(inout) :: p
-      p%x = a
-      p%y = b
+      type (point) :: p
+      ! p%x = a
+      ! p%y = b
     end subroutine sub_p
 
     ! tried changing inout to value, doesn't work with ruby still
     ! tried using bind_c, doesn't work
     subroutine sub_p_two(a, b) bind(c, name = 'sub_p_two')
-      use ISO_C_BINDING
       implicit none
       integer, intent(in) :: a, b
       type (cpoint) :: p

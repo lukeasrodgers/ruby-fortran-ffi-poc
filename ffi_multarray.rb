@@ -23,6 +23,7 @@ module Flib
   attach_function :sub_p_two, [ :int, :int ], :void
   attach_function :ret_cgpoint, [ :int, :int ], Point.by_ref
   attach_function :__exports_MOD_sum_arr, [ :pointer, :int ], :int
+  attach_function :__exports_MOD_dot_prod, [ :pointer, :pointer, :int ], :int
 end
 
 module Clib
@@ -44,6 +45,13 @@ arr_ptr = FFI::MemoryPointer.new(:int, 10)
 arr_ptr.write_array_of_int((1..10).to_a)
 sum = Flib.__exports_MOD_sum_arr(arr_ptr, 10)
 puts "sum: #{sum}"
+
+dot_prod_arr1 = FFI::MemoryPointer.new(:int, 50)
+dot_prod_arr2 = FFI::MemoryPointer.new(:int, 50)
+dot_prod_arr1.write_array_of_int((1..50).to_a)
+dot_prod_arr2.write_array_of_int((1..50).to_a)
+dot_product = Flib.__exports_MOD_dot_prod(dot_prod_arr1, dot_prod_arr2, 50)
+puts "dot_product: #{dot_product}"
 
 # segfaults
 # n = Flib.ret_cgpoint(1,2)

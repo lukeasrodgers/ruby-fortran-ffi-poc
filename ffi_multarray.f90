@@ -148,4 +148,11 @@ module exports
       integer, dimension(n), intent(in) :: arr
       sum_arr = sum(arr)
     end function sum_arr
+
+    integer function dot_prod(arr, arr2, n)
+      integer, intent(in), value :: n
+      integer, dimension(n), intent(in) :: arr, arr2
+      dot_prod = dot_product(arr, arr2)
+    end function dot_prod
+
 end module exports

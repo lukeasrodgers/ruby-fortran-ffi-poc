@@ -13,6 +13,8 @@ are a few approaches I was able to get *mostly* working.
 The following code snippets leave off the ruby-ffi/Fortran boilerplate, which you can get
 from the src in this repo. It assumes a ruby module named Flib.
 
+Some benchmarks on Fortran/ruby speed differences are in `bench.rb`.
+
 ## Compiling
 
 See `makefile` for compilation commands, assumes presence of gfortran.
@@ -106,6 +108,36 @@ integer function sum_arr(arr, n)
   sum_arr = sum(arr)
 end function sum_arr
 ```
+
+For large arrays, Fortran may be faster than Ruby, though for small arrays, the cost of
+interacting with the pointer may offset any performance boosts.
+
+E.g., for summing an array, Fortran may be about an order of magnitude faster.
+
+```
+Rehearsal -------------------------------------------
+fortran   0.000000   0.010000   0.010000 (  0.008619)
+ruby      0.060000   0.000000   0.060000 (  0.054099)
+---------------------------------- total: 0.070000sec
+
+              user     system      total        real
+fortran   0.000000   0.000000   0.000000 (  0.006263)
+ruby      0.050000   0.000000   0.050000 (  0.055970)
+```
+
+For computing dot product of two arrays, Fortran may be ~2x faster.
+
+```
+Rehearsal -------------------------------------------
+fortran   0.000000   0.000000   0.000000 (  0.000016)
+ruby      0.000000   0.000000   0.000000 (  0.000036)
+---------------------------------- total: 0.000000sec
+
+              user     system      total        real
+fortran   0.000000   0.000000   0.000000 (  0.000013)
+ruby      0.000000   0.000000   0.000000 (  0.000035)
+```
+
 
 ## Set values on a Fortran derived type, and return a pointer to it
 

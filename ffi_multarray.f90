@@ -142,4 +142,10 @@ module exports
       ! xs = ([(i,i=1,n)])
       ! point_to_xs => xs
     ! end function point_to_xs
+
+    integer function sum_arr(arr, n)
+      integer, intent(in), value :: n
+      integer, dimension(n), intent(in) :: arr
+      sum_arr = sum(arr)
+    end function sum_arr
 end module exports

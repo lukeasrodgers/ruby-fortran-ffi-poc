@@ -22,6 +22,7 @@ module Flib
   attach_function :ret_p_loc, [ :int, :int ], :int
   attach_function :sub_p_two, [ :int, :int ], :void
   attach_function :ret_cgpoint, [ :int, :int ], Point.by_ref
+  attach_function :__exports_MOD_sum_arr, [ :pointer, :int ], :int
 end
 
 module Clib
@@ -38,6 +39,11 @@ puts "int_ptr read_array_of_int: #{int_ptr.read_array_of_int(5)}"
 
 x = Flib.ret_i()
 puts "x: #{x}"
+
+arr_ptr = FFI::MemoryPointer.new(:int, 10)
+arr_ptr.write_array_of_int((1..10).to_a)
+sum = Flib.__exports_MOD_sum_arr(arr_ptr, 10)
+puts "sum: #{sum}"
 
 # segfaults
 # n = Flib.ret_cgpoint(1,2)

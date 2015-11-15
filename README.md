@@ -77,6 +77,36 @@ subroutine assign_arr (my_arr) bind(c, name = 'assign_arr')
 end subroutine assign_arr
 ```
 
+## Pass an array of int to Fortran function, get the result of an operation on those ints
+
+For some reason, this won't work with a deferred shape array, you must pass the size of the array,
+F77-style, otherwise Fortran thinks the array has zero length -- it won't segfault (in my
+experience), it will just behave incorrectly.
+
+Create a pointer with enough space, write the values to the pointer, then pass it along with
+its size to Fortran.
+
+ruby:
+
+```ruby
+attach_function :__exports_MOD_sum_arr, [ :pointer, :int ], :int
+...
+arr_ptr = FFI::MemoryPointer.new(:int, 10)
+arr_ptr.write_array_of_int((1..10).to_a)
+sum = Flib.__exports_MOD_sum_arr(arr_ptr, 10)
+puts "sum: #{sum}"
+```
+
+fortran: 
+
+```fortran
+integer function sum_arr(arr, n)
+  integer, intent(in), value :: n
+  integer, dimension(n), intent(in) :: arr
+  sum_arr = sum(arr)
+end function sum_arr
+```
+
 ## Set values on a Fortran derived type, and return a pointer to it
 
 Here we can't use `bind(c)` because we're returning a Fortran pointer, so using `nm` we 

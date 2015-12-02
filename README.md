@@ -1,17 +1,19 @@
 This experimental code is an attempted proof-of-concept for ruby calling Fortran code
-via the [ruby ffi](https://github.com/ffi/ffi) library.
+via the [ruby ffi](https://github.com/ffi/ffi) library and Fiddle from ruby stdlib. There is also
+some simple C code called via FFI and Fiddle, though it was mostly written just to figure out
+how to get the Fortran interop working.
 
-It works on OSX and gfortran 5.1.0 -- I have no idea if it will work with other setups.
+This code runs on OSX and gfortran 5.1.0 -- I have no idea if it will work with other setups.
 
-My familiarity with both ruby-ffi and Fortran is very limited, so there are probably many
+My familiarity with both ruby-ffi, Fiddle, and Fortran (and C!) is very limited, so there are probably many
 mistakes and errors of understanding here.
 
 My goal was to figure out how to use Fortran subroutines and/or functions to be callable from
 ruby, and manipulate and return data. After a lot of experimentation and segfaults, here 
 are a few approaches I was able to get *mostly* working.
 
-The following code snippets leave off the ruby-ffi/Fortran boilerplate, which you can get
-from the src in this repo. It assumes a ruby module named Flib.
+The following code snippets leave off some of the ruby-ffi/Fiddle/Fortran boilerplate, which you can get
+from the src in this repo. It assumes a ruby module named Flib (ffi) or fortlib (Fiddle).
 
 Some benchmarks on Fortran/ruby speed differences are in `bench.rb`.
 
@@ -29,7 +31,7 @@ You can inspect them using the commandline tool `nm`, e.g. `nm -g ffi_multarray.
 ## Calling Fortran
 
 Fortran 95 (I believe) introduced constructs for simplifying interop with C, which we can use
-to work with ruby-ffi. One major difference between C and Fortran we need to take into account
+to work with ruby. One major difference between C and Fortran we need to take into account
 is that C is call-by-value, while Fortran is (basically) call by reference (see [Call by copy-restore](https://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_copy-restore)
 for more information).
 
@@ -40,10 +42,22 @@ evaluation, `use ISO_C_BINDING`, `integer(c_int)`, and some extra indirection wi
 
 We don't need to explicitly make `ret_i` a `c_int` here.
 
-ruby:
+ruby ffi:
 
 ```ruby
 attach_function :ret_i, [], :int
+puts Flib.ret_i
+```
+
+ruby fiddle
+
+```ruby
+ret_i = Fiddle::Function.new(
+  fortlib['ret_i'],
+  [],
+  Fiddle::TYPE_INT
+)
+puts ret_i.call
 ```
 
 fortran:
@@ -56,7 +70,9 @@ end function ret_i
 
 ## Allocate and return a Fortran array from a subroutine
 
-ruby:
+Here we allocate the array in ruby, pass a pointer to Fortran, and Fortran populates the array values.
+
+ruby ffi:
 
 ```ruby
 attach_function :assign_arr, [ :pointer ], :void
@@ -66,6 +82,20 @@ Flib.assign_arr(ptr)
 int_ptr = ptr.read_pointer
 puts "ints: #{int_ptr.read_array_of_int(5)}"
 => [1, 2, 3, 4, 5]
+```
+
+ruby fiddle:
+
+```ruby
+assign_arr = Fiddle::Function.new(
+  fortlib['assign_arr'],
+  [Fiddle::TYPE_VOIDP],
+  Fiddle::TYPE_VOID
+)
+assign_arr_ptr = Fiddle::Pointer.malloc(5 * Fiddle::SIZEOF_INT)
+assign_arr.call(assign_arr_ptr.ref)
+assigned = (0..4).map { |i| assign_arr_ptr[i*Fiddle::SIZEOF_INT] }
+puts "assigned: #{assigned}"
 ```
 
 fortran:
@@ -88,7 +118,7 @@ experience), it will just behave incorrectly.
 Create a pointer with enough space, write the values to the pointer, then pass it along with
 its size to Fortran.
 
-ruby:
+ruby ffi:
 
 ```ruby
 attach_function :__exports_MOD_sum_arr, [ :pointer, :int ], :int
@@ -96,6 +126,20 @@ attach_function :__exports_MOD_sum_arr, [ :pointer, :int ], :int
 arr_ptr = FFI::MemoryPointer.new(:int, 10)
 arr_ptr.write_array_of_int((1..10).to_a)
 sum = Flib.__exports_MOD_sum_arr(arr_ptr, 10)
+puts "sum: #{sum}"
+```
+
+ruby fiddle:
+
+```ruby
+sum_arr = Fiddle::Function.new(
+  fortlib['__exports_MOD_sum_arr'],
+  [Fiddle::TYPE_INTPTR_T, Fiddle::TYPE_INT],
+  Fiddle::TYPE_INT
+)
+ptr = Fiddle::Pointer.malloc(10 * Fiddle::SIZEOF_INT)
+(1..10).to_a.each {|i| ptr[i*Fiddle::SIZEOF_INT] = i+1}
+sum = sum_arr.call(ptr, 10)
 puts "sum: #{sum}"
 ```
 
@@ -153,7 +197,14 @@ subroutine.
 In order to interact with the integers passed to the Fortran subroutine, they must be both
 declared as `c_int` and passed by value.
 
-ruby:
+The fiddle code here took a long to time figure out. You might think you'd be able to do something
+like call `to_value` on the pointer you passed to Fortran; unfortunately, the Fortran code
+overwrites the first two ints of our ruby object, which translates to the same address space as that
+which is allocated for the ruby objec'ts RBasic C struct, the first 8 bytes of which is used for 
+ruby object flags. There may be some more direct way to accomplish this in Fiddle that I couldn't
+figure out, but here (and in general) FFI was a bit easier to work with.
+
+ruby ffi:
 
 ```ruby
 class Point < FFI::Struct
@@ -170,6 +221,38 @@ puts point_ptr
 => #<FFI::MemoryPointer address=0x00000102d7e450 size=8>
 puts "p: #{p}, #{p[:x]}, #{p[:y]}"
 => p: 1, 2
+```
+
+ruby fiddle:
+
+```ruby
+require 'fiddle/struct'
+require 'fiddle/cparser'
+include Fiddle::CParser
+types, members = parse_struct_signature(['int x','int y']) # from Fiddle::CParser
+Point = Fiddle::CStructBuilder.create(Fiddle::CStruct, types, members)
+
+point_ptr = Fiddle::Pointer.malloc(Point.size)
+sub_p = Fiddle::Function.new(
+  fortlib['__exports_MOD_sub_p'],
+  [Fiddle::TYPE_INT, Fiddle::TYPE_INT, Fiddle::TYPE_VOIDP],
+  Fiddle::TYPE_VOID
+)
+
+# Our Fortran subroutine takes a pointer to a memory address large enough to hold a Point from ruby,
+# manipulates the values of a statically allocated Fortran point object, then returns a pointer to it.
+# We treat point_ptr as a pointer to a pointer.
+# Fiddle::SIZEOF_UINTPTR_T is 64 bits, size of ptr on i86 platform, unpack it appropriately. 
+# You might be able to get away with just using 'L_' here, which should be a platform-appropraite
+# size long, and (therefore?) the size of a pointer.
+unpack_directive = Fiddle::SIZEOF_UINTPTR_T == 8 ? 'Q' : 'L'
+sub_p.call(2, 16, point_ptr)
+new_pointer = point_ptr[0, Fiddle::SIZEOF_UINTPTR_T].unpack(unpack_directive).first
+point = Point.new(new_pointer)
+puts point.x
+# => 2
+puts point.y
+# => 16
 ```
 
 fortran:
@@ -213,7 +296,7 @@ Caveats:
   ```
 * This will occasionally segfault.
 
-ruby:
+ruby ffi:
 
 ```ruby
 attach_function :__exports_MOD_sub_p_arr, [:int, :int, :pointer], :void
@@ -226,6 +309,12 @@ puts "p2: #{p2}, #{p2[:x]}, #{p2[:y]}"
 p3 = Point.new(point_ptr_arr.read_pointer + Point.size)
 puts "p3: #{p3}, #{p3[:x]}, #{p3[:y]}"
 => p3: 8, 14
+```
+
+ruby fidde:
+
+```ruby
+# not yet implemented
 ```
 
 fortran:

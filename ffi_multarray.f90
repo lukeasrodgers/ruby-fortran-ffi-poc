@@ -35,12 +35,24 @@ module exports
       output = 3
     end subroutine wont_set_out
 
+    ! array must be allocatable, though we needn't actually allocate it, so long as we
+    ! have already done so for the pointer we pass in. fiddle handles this fine either way,
+    ! but if we pass in an already-allocated ffi pointer, and this array is not allocated,
+    ! we get a segfault.
+    ! On the other hand, if we've already allocated with malloc and attempt to do an
+    ! actual allocation here, the program will crash with a Gfortran complaint about an
+    ! already-allocated array.
     subroutine assign_arr (my_arr) bind(c, name = 'assign_arr')
       implicit none
       integer, target, allocatable, dimension(:) :: my_arr
-      allocate(my_arr(0:4))
       my_arr = [1,2,3,4,5]
     end subroutine assign_arr
+
+    subroutine assign_allocated_arr(my_arr) bind(c, name = 'assign_allocated_arr')
+      implicit none
+      integer, target, dimension(:) :: my_arr
+      my_arr = [1,2,3,4,5]
+    end subroutine assign_allocated_arr
 
     ! works
     integer function ret_i() bind(c, name = 'ret_i')
